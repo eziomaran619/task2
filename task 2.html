@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>RogueLike Dungeon Crawler</title>
+
+	<style type="text/css">
+
+		#gameCanvas {
+			background-color: black ; 
+			display: block ; /* to avoid scroll bars */
+		}
+
+	</style>
+</head>
+<body style="background-color: black ;">
+
+	<canvas id="gameCanvas" width ="1520" height = "740"></canvas> 
+
+	<script type="text/javascript">  //initially draw the basic layout at 610 , 220
+		'use strict'
+
+		var canvas = document.getElementById("gameCanvas") ;
+
+		//the backgrond image
+		var dungeonBasicLayout = document.createElement("IMG") ;
+		dungeonBasicLayout.src = "dungeon_basic_layout.png" ;
+
+		// remember camera is fixed to the protagonist
+		var overallDisplacement = { x:0 , y:0 } ;
+
+		// protagonist object constructor
+		function protagonist () {
+			this.x = 760 ;
+			this.y = 370 ;
+			this.type = "intelligent" ;
+			this.totalAnimationFrames = 8 ; // refers to horizontal or vertical depending on the character
+			this.currentHorizontalFrameIndex = 0 ;
+			this.currentVerticalFrameIndex = 0 ;
+			this.spriteAnimation = "horizontal" ;
+			this.height = 70 ;
+			this.width = 70 ;
+			this.direction = "south" ;
+			this.speed = 3 ;
+		}
+
+		var protagonistObj = new protagonist() ;
+
+		//protagonist image
+		var protagonistImage = document.createElement("IMG") ;
+		protagonistImage.src = "character_sprites/intellligent_character_movement_sprite.png" ;
+
+		// to avoid background being drawn over the protagonist as loading background image takes longer time due to bigger size
+		var drawProtagonist = false ;
+
+		// should draw the image only after it is loaded
+		dungeonBasicLayout.onload = function () {
+			var cxt = canvas.getContext("2d") ;
+			cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150,protagonistObj.y-150) ;
+
+			if (drawProtagonist) {
+				cxt.drawImage( protagonistImage , protagonistObj.width*protagonistObj.currentHorizontalFrameIndex , 
+				               protagonistObj.height*protagonistObj.currentVerticalFrameIndex , protagonistObj.width , 
+				               protagonistObj.height , protagonistObj.x - protagonistObj.width/2 , 
+				               protagonistObj.y - protagonistObj.height/2 , protagonistObj.width , protagonistObj.height ) ;
+			}
+		}
+
+
+
+		protagonistImage.onload = function () { drawProtagonist = true ; }
+
+
+
+		function Game() {
+
+			this.cxt = canvas.getContext("2d") ;
+
+			this.intervalAlreadySetFor = false ; //interval is already set for which direction south or north or east or west
+
+			document.addEventListener("keydown" , function (e) {
+
+				if (e.key === "s" || e.key === "S") {
+
+					if (!(this.intervalAlreadySetFor == "south")) {
+
+						clearInterval(this.timeInterval) ;
+					
+					    this.timeInterval = setInterval ( function () {
+
+						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
+							protagonistObj.currentHorizontalFrameIndex = 0 ;
+						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
+
+					    } , 100 ) ;
+
+					    this.intervalAlreadySetFor = "south" ;
+
+					}					
+
+					protagonistObj.direction = "south" ;
+					protagonistObj.currentVerticalFrameIndex = 0 ;
+					overallDisplacement.y -= protagonistObj.speed ;
+				}
+
+
+				                    if (e.key === "a" || e.key === "A") {
+
+					if (!(this.intervalAlreadySetFor == "west")) {
+
+						clearInterval(this.timeInterval) ;
+					
+					    this.timeInterval = setInterval ( function () {
+
+						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
+							protagonistObj.currentHorizontalFrameIndex = 0 ;
+						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
+
+					    } , 100 ) ;
+
+					    this.intervalAlreadySetFor = "west" ;
+
+					}					
+
+					protagonistObj.direction = "west" ;
+					protagonistObj.currentVerticalFrameIndex = 1 ;
+					overallDisplacement.x += protagonistObj.speed ;
+				}
+
+
+				if (e.key === "d" || e.key === "D") {
+
+					if (!(this.intervalAlreadySetFor == "east")) {
+
+						clearInterval(this.timeInterval) ;
+					
+					    this.timeInterval = setInterval ( function () {
+
+						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
+							protagonistObj.currentHorizontalFrameIndex = 0 ;
+						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
+
+					    } , 100 ) ;
+
+					    this.intervalAlreadySetFor = "east" ;
+
+					}					
+
+					protagonistObj.direction = "east" ;
+					protagonistObj.currentVerticalFrameIndex = 2 ;
+					overallDisplacement.x -= protagonistObj.speed ;
+				}
+
+
+				if (e.key === "w" || e.key === "W") {
+
+					if (!(this.intervalAlreadySetFor == "north")) {
+
+						clearInterval(this.timeInterval) ;
+					
+					    this.timeInterval = setInterval ( function () {
+
+						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
+							protagonistObj.currentHorizontalFrameIndex = 0 ;
+						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
+
+					    } , 100 ) ;
+
+					    this.intervalAlreadySetFor = "north" ;
+
+					}					
+
+					protagonistObj.direction = "north" ;
+					protagonistObj.currentVerticalFrameIndex = 3 ;
+					overallDisplacement.y += protagonistObj.speed ;
+				}
+
+			} ) // event listner for keydown ends here
+
+
+
+			document.addEventListener("keyup" , function () {
+
+				clearInterval(this.timeInterval) ;
+				protagonistObj.currentHorizontalFrameIndex = 0 ;
+				this.intervalAlreadySetFor = false ;
+
+			} )
+
+
+
+			this.draw = function () {
+
+				this.cxt.clearRect(0,0,canvas.width,canvas.height) ;
+
+			    this.cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150+overallDisplacement.x , 
+			    	                                  protagonistObj.y-150+overallDisplacement.y ) ;
+
+			    this.cxt.drawImage( protagonistImage , protagonistObj.width*protagonistObj.currentHorizontalFrameIndex , 
+				                    protagonistObj.height*protagonistObj.currentVerticalFrameIndex , protagonistObj.width , 
+				                    protagonistObj.height , protagonistObj.x - protagonistObj.width/2 , 
+				                    protagonistObj.y - protagonistObj.height/2 , protagonistObj.width , protagonistObj.height ) ;
+
+			    //console.log("success") ;
+			}
+
+		}
+
+		Game.prototype.update = function () {}
+
+
+
+		var game = new Game() ;
+
+		function gameLoop() {
+
+			game.draw() ;
+			
+			window.requestAnimationFrame(gameLoop) ;
+		}
+
+		var startGame = window.requestAnimationFrame(gameLoop) ;
+
+
+	</script>
+</body>
+</html>
